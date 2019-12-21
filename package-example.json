@@ -1,0 +1,39 @@
+{
+    "name": "rpi-love-notes-react",
+    "version": "0.1.0",
+    "private": true,
+    "dependencies": {
+      "react": "^16.11.0",
+      "react-bootstrap": "^1.0.0-beta.14",
+      "react-dom": "^16.11.0",
+      "react-scripts": "^3.3.0",
+      "uuid": "^3.3.3"
+    },
+    "config": {
+      "aws_cli_profile": "default",
+      "s3_bucket_url": "s3://some-bucket-name-here"
+    },
+    "scripts": {
+      "start": "react-scripts start",
+      "build": "react-scripts build",
+      "test": "react-scripts test",
+      "eject": "react-scripts eject",
+      "deploy": "react-scripts build && aws s3 sync --profile $npm_package_config_aws_cli_profile build/ $npm_package_config_s3_bucket_url"
+    },
+    "eslintConfig": {
+      "extends": "react-app"
+    },
+    "browserslist": {
+      "production": [
+        ">0.2%",
+        "not dead",
+        "not op_mini all"
+      ],
+      "development": [
+        "last 1 chrome version",
+        "last 1 firefox version",
+        "last 1 safari version"
+      ]
+    }
+  }
+  

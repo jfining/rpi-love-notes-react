@@ -1,0 +1,168 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Create a dynamo table for storing love notes and an api gateway to access them.
+
+Resources:
+  LoveNotesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: love-notes
+      AttributeDefinitions:
+        -
+          AttributeName: "uuid"
+          AttributeType: "S"
+      KeySchema:
+        -
+          AttributeName: "uuid"
+          KeyType: "HASH"
+      BillingMode: "PAY_PER_REQUEST"
+
+  LoveNotesApiGateway:
+    Type: "AWS::ApiGateway::RestApi"
+    DependsOn:
+      - LoveNotesTable
+      - ApiGatewayAccessDynamoRole
+    Properties:
+      Name: love-notes-api
+      Description: api gw for love notes app
+
+  LoveNotesApiGatewayRootPostMethod:
+    Type: "AWS::ApiGateway::Method"
+    DependsOn:
+      - LoveNotesApiGateway
+    Properties:
+      AuthorizationType: "NONE"
+      HttpMethod: "POST"
+      Integration:
+        Credentials: !GetAtt ApiGatewayAccessDynamoRole.Arn
+        IntegrationHttpMethod: "POST"
+        Type: "AWS"
+        Uri: "arn:aws:apigateway:us-east-1:dynamodb:action/PutItem"
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'*'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        RequestTemplates:
+          "application/json": !Sub >
+            {
+              "TableName": "love-notes",
+              "Item": {
+                "uuid": {"S":"$input.path('$.uuid')"},
+                "timestamp": {"S":"$input.path('$.timestamp')"},
+                "message": {"S":"$input.path('$.message')"},
+                "ack": {"S":"$input.path('$.ack')"},
+                "author": {"S":"$input.path('$.author')"}
+              }
+            }
+
+
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+      ResourceId: !GetAtt LoveNotesApiGateway.RootResourceId
+      RestApiId: !Ref LoveNotesApiGateway
+
+  LoveNotesApiGatewayRootOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    DependsOn:
+      - LoveNotesApiGateway
+    Properties:
+      ResourceId: !GetAtt LoveNotesApiGateway.RootResourceId
+      RestApiId: !Ref LoveNotesApiGateway
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        IntegrationResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+            method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
+            method.response.header.Access-Control-Allow-Origin: "'*'"
+          ResponseTemplates:
+            application/json: ''
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        Type: MOCK
+      MethodResponses:
+      - StatusCode: 200
+        ResponseModels:
+          application/json: 'Empty'
+        ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+
+  LoveNotesApiGatewayScanMethod:
+    Type: "AWS::ApiGateway::Method"
+    DependsOn:
+      - LoveNotesApiGateway
+    Properties:
+      AuthorizationType: "NONE"
+      HttpMethod: "GET"
+      Integration:
+        Credentials: !GetAtt ApiGatewayAccessDynamoRole.Arn
+        IntegrationHttpMethod: "POST"
+        Type: "AWS"
+        Uri: "arn:aws:apigateway:us-east-1:dynamodb:action/Scan"
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'*'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        RequestTemplates:
+          "application/json": !Sub >
+            {
+              "TableName": "love-notes"
+            }
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+      ResourceId: !GetAtt LoveNotesApiGateway.RootResourceId
+      RestApiId: !Ref LoveNotesApiGateway
+
+
+  LoveNotesApiGatewayDeployment:
+    Type: "AWS::ApiGateway::Deployment"
+    DependsOn:
+      - LoveNotesApiGatewayRootPostMethod
+      - LoveNotesApiGatewayScanMethod
+      - LoveNotesApiGatewayRootOptionsMethod
+    Properties:
+      RestApiId: !Ref "LoveNotesApiGateway"
+      StageName: "prod"
+      
+  ApiGatewayAccessDynamoRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - apigateway.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+      Policies:
+        - PolicyName: dynamodbAccessRole
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action:
+              - dynamodb:*
+              Resource: "*"
+            - Effect: Allow
+              Action:
+              - logs:*
+              Resource: "*"

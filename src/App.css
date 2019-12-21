@@ -40,45 +40,69 @@ body {
   max-height: 60px;
   padding: 0;
   background-color: rgba(255, 255, 255, 0.601);
-  border-color: purple;
+  border-color: rgb(114, 47, 89);
 }
 
-.historyButton {
-  background-color: rgba(204, 204, 204, 0.801);
-  border-color: purple;
-  font-size: 10px;
-}
-
-.historySpan {
-  color: black;
+.heartButton:hover {
+  background-color: rgb(114, 47, 89);
+  border-color: white;
 }
 
 .heartImg {
   max-height: 60px;
 }
 
-.historyNavbar {
-  padding-right: 0px;
-}
-
-.loveNoteJumbotron {
-  margin-bottom: 10px;
-  padding-top: 0px;
-  padding-bottom: 0px;
-  text-align: center;
-  background-color: rgba(255, 255, 255, 1);
-}
-
 .loveNoteSpan {
   background-color:white;
 }
 
+.loveNoteCard {
+  border-color: rgb(114, 47, 89);
+}
+
+.loveNoteCardHeader {
+  border-color: rgb(114, 47, 89);
+}
+
 .loveNoteCardBody {
-  min-height: 220px;
-  background-color: rgba(255, 255, 255, 0.95))
+  min-height: 0px;
+  background-color: rgba(255, 255, 255, 0.95);
 }
 
 .loveNoteNavbar {
   max-height: 40px;
   background-color: rgba(255,255,255,0.9);
+}
+
+.newNoteButton {
+  background-color: rgb(114, 47, 89);
+  border-color: white;
+}
+
+.newNoteButton:hover {
+  border-color: rgb(114, 47, 89);
+  background-color: white;
+}
+
+.newNoteButton:focus {
+  box-shadow: rgb(114, 47, 89);
+}
+
+.newNoteButtonSpan {
+  color: white
+}
+
+.newNoteButtonSpan:hover {
+  color: rgb(114, 47, 89);
+}
+
+.newNoteSubmitButton {
+  background-color: rgb(114, 47, 89);
+  border-color: white;
+}
+
+.newNoteSubmitButton:hover {
+  border-color: rgb(114, 47, 89);
+  background-color: white;
+  color: rgb(114, 47, 89);
 }
