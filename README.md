@@ -2,6 +2,7 @@
 React page that allows for posting love notes.
 
 Also included is a script for Raspberry Pi that makes a butterfly toy flap its wings when a new message is posted!
+![butterfly](./docs/butterfly.gif)
 
 ## Deployment Instructions
 1. Run the AWS Cloudformation template to deploy the back end services.
